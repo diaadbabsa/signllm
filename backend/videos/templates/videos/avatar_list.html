@@ -1,0 +1,88 @@
+{% extends "videos/base.html" %}
+{% block title %}الإشارات{% endblock %}
+{% block nav_list %}active{% endblock %}
+
+{% block extra_css %}
+table { width: 100%; border-collapse: collapse; }
+th { background: #f8f9fe; color: #666; font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+th, td { padding: 14px 16px; text-align: right; border-bottom: 1px solid #f0f0f5; }
+tr:hover td { background: #fafafe; }
+.sign-name { font-weight: 600; font-size: 16px; color: #6C63FF; }
+.desc-preview { font-size: 13px; color: #777; max-width: 400px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.video-thumb { width: 80px; height: 60px; border-radius: 8px; object-fit: cover; background: #eee; }
+.badge {
+    display: inline-block;
+    background: linear-gradient(135deg, #6C63FF20, #4ECDC420);
+    color: #6C63FF;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+}
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: #999;
+}
+.empty-state svg { width: 80px; height: 80px; margin-bottom: 16px; opacity: 0.3; }
+form.inline { display: inline; }
+{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="page-header">
+        <h2>إشارات الأفاتار <span class="badge">{{ avatars.count }}</span></h2>
+        <a href="{% url 'avatar_upload' %}" class="btn btn-primary">+ رفع إشارة جديدة</a>
+    </div>
+
+    {% if avatars %}
+    <table>
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>اسم الإشارة</th>
+                <th>فيديو</th>
+                <th>وصف الحركات</th>
+                <th>تاريخ الإضافة</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for avatar in avatars %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td class="sign-name">{{ avatar.name }}</td>
+                <td>
+                    {% if avatar.video %}
+                    <video class="video-thumb" muted>
+                        <source src="{{ avatar.video.url }}" type="video/mp4">
+                    </video>
+                    {% else %}
+                    <span style="color:#ccc">—</span>
+                    {% endif %}
+                </td>
+                <td class="desc-preview" title="{{ avatar.description }}">
+                    {{ avatar.description|truncatechars:100 }}
+                </td>
+                <td style="font-size:13px; color:#999">{{ avatar.created_at|date:"Y/m/d" }}</td>
+                <td>
+                    <form class="inline" method="post" action="{% url 'avatar_delete' avatar.pk %}"
+                          onsubmit="return confirm('هل أنت متأكد من حذف &quot;{{ avatar.name }}&quot;؟')">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger">حذف</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="empty-state">
+        <div style="font-size:48px; opacity:0.3">📭</div>
+        <p style="font-size:18px; margin-top:12px">لا توجد إشارات بعد</p>
+        <p style="margin-top:8px">ابدأ برفع أول إشارة أفاتار</p>
+        <a href="{% url 'avatar_upload' %}" class="btn btn-primary" style="margin-top:20px">+ رفع إشارة</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
